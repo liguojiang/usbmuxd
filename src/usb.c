@@ -395,6 +395,10 @@ static int usb_device_add(libusb_device* dev)
 		libusb_release_interface(handle, usbdev->interface);
 		libusb_close(handle);
 		free(usbdev);
+		/*
+		 *	FIXME
+		 */
+		exit(-1);
 		return -1;
 	}
 	usbdev->serial[res] = 0;
