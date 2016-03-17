@@ -95,21 +95,12 @@ static void np_callback(const char* notification, void* userdata)
 		lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
 		if (lerr != LOCKDOWN_E_SUCCESS) {
 			usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
+			/*
+			 *	FIXME
+			 *	Liguojiang
+			 */
+			exit(-1);
 			return;
-		}
-
-		lerr = lockdownd_pair(lockdown, NULL);
-		if (lerr != LOCKDOWN_E_SUCCESS) {
-			usbmuxd_log(LL_ERROR, "%s: ERROR: Pair failed for device %s, lockdown error %d", __func__, _dev->udid, lerr);
-			lockdownd_client_free(lockdown);
-			return;
-		}
-		lockdownd_client_free(lockdown);
-		*/
-		lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
-		if (lerr != LOCKDOWN_E_SUCCESS) {
-			usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
-			continue;
 		}
 
 		lerr = lockdownd_pair(lockdown, NULL);
@@ -121,7 +112,7 @@ static void np_callback(const char* notification, void* userdata)
 			 *	Liguojiang
 			 */
 			exit(-1);
-			continue;
+			return;
 		}
 		lockdownd_client_free(lockdown);
 	} else if (strcmp(notification, "com.apple.mobile.lockdown.request_host_buid") == 0) {
