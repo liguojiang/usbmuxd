@@ -667,6 +667,10 @@ static void device_tcp_input(struct mux_device *dev, struct tcphdr *th, unsigned
 				conn->state = CONN_REFUSED;
 			usbmuxd_log(LL_INFO, "Connection refused by device %d (%d->%d)", dev->id, sport, dport);
 			connection_teardown(conn); //this also sends the notification to the client
+			/*
+			 *	FIXME
+			 */
+			exit(-1);
 		} else {
 			conn->tx_seq++;
 			conn->tx_ack++;
@@ -689,6 +693,10 @@ static void device_tcp_input(struct mux_device *dev, struct tcphdr *th, unsigned
 			if(th->th_flags & TH_RST)
 				conn->state = CONN_DYING;
 			connection_teardown(conn);
+			/*
+			 *	FIXME
+			 */
+			exit(-1);
 		} else {
 			connection_device_input(conn, payload, payload_length);
 
