@@ -693,10 +693,6 @@ static void device_tcp_input(struct mux_device *dev, struct tcphdr *th, unsigned
 			if(th->th_flags & TH_RST)
 				conn->state = CONN_DYING;
 			connection_teardown(conn);
-			/*
-			 *	FIXME
-			 */
-			exit(-1);
 		} else {
 			connection_device_input(conn, payload, payload_length);
 
