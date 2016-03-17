@@ -92,48 +92,38 @@ static void np_callback(const char* notification, void* userdata)
 
 	if (strcmp(notification, "com.apple.mobile.lockdown.request_pair") == 0) {
 		usbmuxd_log(LL_INFO, "%s: user trusted this computer on device %s, pairing now", __func__, _dev->udid);
-		int i = 0;
-		for (i=0; i<5; i++) {
-			usbmuxd_log(LL_INFO, "%s: try %d pairing", __func__, _dev->udid, i);
+		lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
+		if (lerr != LOCKDOWN_E_SUCCESS) {
+			usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
+			return;
+		}
+
+		lerr = lockdownd_pair(lockdown, NULL);
+		if (lerr != LOCKDOWN_E_SUCCESS) {
+			usbmuxd_log(LL_ERROR, "%s: ERROR: Pair failed for device %s, lockdown error %d", __func__, _dev->udid, lerr);
+			lockdownd_client_free(lockdown);
+			return;
+		}
+		lockdownd_client_free(lockdown);
+		*/
+		lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
+		if (lerr != LOCKDOWN_E_SUCCESS) {
+			usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
+			continue;
+		}
+
+		lerr = lockdownd_pair(lockdown, NULL);
+		if (lerr != LOCKDOWN_E_SUCCESS) {
+			usbmuxd_log(LL_ERROR, "%s: ERROR: Pair failed for device %s, lockdown error %d", __func__, _dev->udid, lerr);
+			lockdownd_client_free(lockdown);
 			/*
-			lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
-			if (lerr != LOCKDOWN_E_SUCCESS) {
-				usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
-				return;
-			}
-	
-			lerr = lockdownd_pair(lockdown, NULL);
-			if (lerr != LOCKDOWN_E_SUCCESS) {
-				usbmuxd_log(LL_ERROR, "%s: ERROR: Pair failed for device %s, lockdown error %d", __func__, _dev->udid, lerr);
-				lockdownd_client_free(lockdown);
-				return;
-			}
-			lockdownd_client_free(lockdown);
-			*/
-			lerr = lockdownd_client_new(dev, &lockdown, "usbmuxd");
-			if (lerr != LOCKDOWN_E_SUCCESS) {
-				usbmuxd_log(LL_ERROR, "%s: ERROR: Could not connect to lockdownd on device %s, lockdown error %d", __func__, _dev->udid, lerr);
-				continue;
-			}
-	
-			lerr = lockdownd_pair(lockdown, NULL);
-			if (lerr != LOCKDOWN_E_SUCCESS) {
-				usbmuxd_log(LL_ERROR, "%s: ERROR: Pair failed for device %s, lockdown error %d", __func__, _dev->udid, lerr);
-				lockdownd_client_free(lockdown);
-				continue;
-			}
-			lockdownd_client_free(lockdown);
-			// device will reconnect by itself at this point.
-
-		}
-		
-		if ( i == 5 ) {
-			usbmuxd_log(LL_INFO, "%s: pairing fail, exit.", __func__, _dev->udid);	
+			 *	FIXME
+			 *	Liguojiang
+			 */
 			exit(-1);
-		}else {
-			usbmuxd_log(LL_INFO, "%s: pairing success.", __func__, _dev->udid);	
+			continue;
 		}
-
+		lockdownd_client_free(lockdown);
 	} else if (strcmp(notification, "com.apple.mobile.lockdown.request_host_buid") == 0) {
 		lerr = lockdownd_client_new(cbdata->dev, &lockdown, "usbmuxd");
 		if (lerr != LOCKDOWN_E_SUCCESS) {
@@ -260,6 +250,11 @@ retry:
 		lerr = lockdownd_start_service(lockdown, "com.apple.mobile.insecure_notification_proxy", &service);
 		if (lerr != LOCKDOWN_E_SUCCESS) {
 			usbmuxd_log(LL_ERROR, "%s: ERROR: Could not start insecure_notification_proxy on %s, lockdown error %d", __func__, _dev->udid, lerr);
+			/*
+			 *	FIXME
+			 * 	Liguojiang
+			 */
+			exit(-1);
 			goto leave;
 		}
 
